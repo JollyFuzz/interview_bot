@@ -1,7 +1,6 @@
 import torch
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from pydub import AudioSegment
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import numpy as np
 
@@ -20,7 +19,7 @@ def load_audio_file(file_path):
     samples = np.array(audio.get_array_of_samples())
     return samples.astype(np.float32) / 32768.0  # нормализация
 
-def voice_transcription(voice_path):
+def message_transcription(voice_path):
     # Загрузка модели и токенизатора
     processor = WhisperProcessor.from_pretrained("openai/whisper-medium")
     model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-medium").to(device)
@@ -39,32 +38,3 @@ def voice_transcription(voice_path):
     transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)
 
     return transcription[0]
-
-#TODO: переименовать
-def inference(text):
-    # Загрузка модели и токенизатора
-    model_name = "Vikhrmodels/QVikhr-3-1.7B-Instruction-noreasoning"
-    model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-    inputs = tokenizer(text, return_tensors="pt").to(device)
-
-    # Generate
-    generate_ids = model.generate(inputs.input_ids, max_length=30)
-    result = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-
-    return result
-
-
-def run(voice_path):
-    text = voice_transcription(voice_path)
-    print(f"Вы наговорили: {text}")
-    result = inference(text)
-    print(f"Результат работы модели {result}")
-
-    return result
-
-
-
-run("sound.ogg")
-
