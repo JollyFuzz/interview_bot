@@ -1,0 +1,2 @@
+&startQ В чем разница между tuple и list &endQ
+&startA Tuple относится к неизменяемым типам данных, list к изменяемым &startA
