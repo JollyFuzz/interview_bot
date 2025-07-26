@@ -4,9 +4,13 @@ from pymongo import MongoClient
 
 
 class QA_Service:
-    def get_question():
+    def __init__(self):
+        self.client = QA_Repository()
+
+    def get_random_question(self):
         """Возвращает вопрос"""
-        return "В чем разница между tuple и list"
+        qa = self.client.get_random_qa()
+        return qa["question"]
 
     def get_answer_by_question(): ...
 
@@ -34,6 +38,19 @@ class QA_Repository:
 
         self.collection = self.db[self.collection_name]
         # TODO: переделать через синглтон(если нужно)
+
+    def get_collection_size(self):
+        """Возвращает длину коллекции"""
+        return self.collection.count_documents({})
+
+    def get_random_qa(self):
+        pipeline = [{"$sample": {"size": 1}}]
+        random_qa = self.collection.aggregate(pipeline)
+
+        if random_qa is None:
+            raise ValueError("Не удалось получить вопрос-ответ")
+
+        return next(random_qa)
 
     def find_by_id(self, question_id: int) -> Optional[dict]:
         pass
