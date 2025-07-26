@@ -1,30 +1,32 @@
 import types
 
 import telebot
+from telebot.custom_filters import StateFilter
 from telebot.handler_backends import State, StatesGroup
 from telebot.types import Message
-from telebot.custom_filters import StateFilter
 
-
-from bot.handler import get_question, handle_answer
+from bot.handler import get_question, process_answer
 from config import Config
 from logger import logger
 
 cfg = Config()
 
-#TODO: вынести состояния
+
+# TODO: вынести состояния
 class UserStates(StatesGroup):
     ANSWERING = State()  # Пользователь отвечает на вопрос
-    WAITING_FEEADBACK = State() # Пользоавтель ждет обратную связь
+    WAITING_FEEADBACK = State()  # Пользоавтель ждет обратную связь
+
 
 logger.info("Инициализация бота")
 
 bot = telebot.TeleBot(cfg.TG_TOKEN)
 
+
 @bot.message_handler(state=UserStates.ANSWERING)
-def repeat_answer(message: Message):
+def handle_answer(message: Message):
     logger.debug("Получен ответ от пользователя")
-    text_answer = handle_answer(message)
+    text_answer = process_answer(bot, message)
 
     bot.send_message(message.chat.id, f"Вы ответили {text_answer}")
 
@@ -41,9 +43,7 @@ def send_question(message):
 
     bot.send_message(message.chat.id, response)
     logger.debug(f"Пользователю отправлен вопрос {response}")
-    
 
 
 bot.add_custom_filter(StateFilter(bot))
 bot.polling(none_stop=True)
-
