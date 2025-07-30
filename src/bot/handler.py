@@ -10,7 +10,7 @@ def get_question():
     return question
 
 
-def process_answer(bot, message):
+def get_text_from_voice(bot, message):
     voice_file = "voice.ogg"
 
     # Получаем информацию о голосовом сообщении
@@ -25,8 +25,10 @@ def process_answer(bot, message):
     # Получение текста из голосового
     result = message_transcription(voice_file)
 
-    
-
     os.remove(voice_file)
 
     return result
+
+
+def answer_analyze(user_answer: str) -> str:
+    return "Вы абсолютно правы"

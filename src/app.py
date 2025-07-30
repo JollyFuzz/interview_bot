@@ -5,7 +5,7 @@ from telebot.custom_filters import StateFilter
 from telebot.handler_backends import State, StatesGroup
 from telebot.types import Message
 
-from bot.handler import get_question, process_answer
+from bot.handler import answer_analyze, get_question, get_text_from_voice
 from config import Config
 from logger import logger
 
@@ -23,12 +23,17 @@ logger.info("Инициализация бота")
 bot = telebot.TeleBot(cfg.TG_TOKEN)
 
 
-@bot.message_handler(state=UserStates.ANSWERING)
+@bot.message_handler(state=UserStates.ANSWERING, content_types=["voice"])
 def handle_answer(message: Message):
-    logger.debug("Получен ответ от пользователя")
-    text_answer = process_answer(bot, message)
+    logger.info("Получен ответ от пользователя")
 
-    bot.send_message(message.chat.id, f"Вы ответили {text_answer}")
+    text_answer = get_text_from_voice(bot, message)
+    logger.info(f"Ответ пользователя расшифрован {text_answer}")
+
+    feedback = answer_analyze(text_answer)
+    logger.info("Ответ проанализирован")
+
+    bot.send_message(message.chat.id, feedback)
 
     bot.delete_state(message.from_user.id, message.chat.id)
 
@@ -38,7 +43,7 @@ def send_question(message):
     logger.debug("Пользователь запросил вопрос")
     response = get_question()
 
-    bot.set_state(message.from_user.id, UserStates.ANSWERING)
+    bot.set_state(message.from_user.id, UserStates.ANSWERING, message.chat.id)
     logger.debug(f"Состояние пользователя измененно на {bot.get_state(message.from_user.id, message.chat.id)}")
 
     bot.send_message(message.chat.id, response)
