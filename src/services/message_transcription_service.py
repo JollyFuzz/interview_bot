@@ -1,9 +1,10 @@
 import numpy as np
-import torch
-from pydub import AudioSegment
-from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# import torch
+# from pydub import AudioSegment
+# from transformers import WhisperForConditionalGeneration, WhisperProcessor
+
+# device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def load_audio_file(file_path):

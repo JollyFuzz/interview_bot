@@ -6,10 +6,8 @@ from telebot.handler_backends import State, StatesGroup
 from telebot.types import Message
 
 from bot.handler import answer_analyze, get_question, get_text_from_voice
-from config import Config
+from config import cfg
 from logger import logger
-
-cfg = Config()
 
 
 # TODO: вынести состояния
@@ -23,8 +21,32 @@ logger.info("Инициализация бота")
 bot = telebot.TeleBot(cfg.TG_TOKEN)
 
 
+@bot.message_handler(commands=["start_session"])
+def start_session(message):
+    """
+    Начинаем сессию вопрос-ответ.
+    Отправляем пользователю вопрос и меняем состояние пользователя на ANSWERING
+    """
+    logger.debug("Пользователь запросил вопрос")
+    try:
+        response = get_question()
+
+        bot.set_state(message.from_user.id, UserStates.ANSWERING, message.chat.id)
+        logger.debug(f"Состояние пользователя измененно на {bot.get_state(message.from_user.id, message.chat.id)}")
+
+        bot.send_message(message.chat.id, response)
+        logger.debug(f"Пользователю отправлен вопрос {response}")
+    except Exception as e:
+        logger.error(f"Неудалось получить вопрос {e}")
+        bot.send_message(message.chat.id, "Не удалось получить вопрос. Попробуйте позже")
+
+
 @bot.message_handler(state=UserStates.ANSWERING, content_types=["voice"])
 def handle_answer(message: Message):
+    """
+    Обрабатываем ответ пользователя.
+    Ответ ожидается в виде голосового сообщения.
+    """
     logger.info("Получен ответ от пользователя")
 
     text_answer = get_text_from_voice(bot, message)
@@ -36,18 +58,6 @@ def handle_answer(message: Message):
     bot.send_message(message.chat.id, feedback)
 
     bot.delete_state(message.from_user.id, message.chat.id)
-
-
-@bot.message_handler(commands=["next"])
-def send_question(message):
-    logger.debug("Пользователь запросил вопрос")
-    response = get_question()
-
-    bot.set_state(message.from_user.id, UserStates.ANSWERING, message.chat.id)
-    logger.debug(f"Состояние пользователя измененно на {bot.get_state(message.from_user.id, message.chat.id)}")
-
-    bot.send_message(message.chat.id, response)
-    logger.debug(f"Пользователю отправлен вопрос {response}")
 
 
 bot.add_custom_filter(StateFilter(bot))
