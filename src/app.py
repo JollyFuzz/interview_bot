@@ -49,7 +49,12 @@ def handle_answer(message: Message):
     """
     logger.info("Получен ответ от пользователя")
 
-    text_answer = get_text_from_voice(bot, message)
+    # Скачиваем голосовое сообщение
+    file_id = message.voice.file_id
+    file_info = bot.get_file(file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+
+    text_answer = get_text_from_voice(downloaded_file)
     logger.info(f"Ответ пользователя расшифрован {text_answer}")
 
     feedback = answer_analyze(text_answer)

@@ -9,6 +9,7 @@ transformers[torch]==4.53.2
 pydub==0.25.1
 numpy==2.2.6
 torch==2.7.1
+
 #tg-bot
 pytelegrambotapi==4.27.0
 

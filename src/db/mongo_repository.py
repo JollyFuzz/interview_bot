@@ -2,8 +2,8 @@ from typing import List, Optional
 
 from pymongo import MongoClient
 
-from db.shemas import qa_schema
 from config import cfg
+from db.shemas import qa_schema
 
 
 class QA_Repository:
@@ -35,19 +35,3 @@ class QA_Repository:
             raise ValueError("Не удалось получить вопрос-ответ")
 
         return random_qa[0]
-
-    def find_by_id(self, question_id: int) -> Optional[dict]:
-        pass
-
-    def save(self, question_data: dict) -> None:
-        # ??? Нужна ли тут обработка или она нужна выше
-        self.collection.insert_one(question_data)
-
-    def update(self, question_id: int, updated_data: dict) -> bool:
-        pass
-
-    def delete(self, question_id: int) -> bool:
-        pass
-
-    def list_all_questions(self) -> List[dict]:
-        pass
